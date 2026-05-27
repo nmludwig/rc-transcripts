@@ -66,6 +66,8 @@ input:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,106,0,0.1)}
 .login-btn{display:inline-flex;align-items:center;gap:10px;background:var(--orange);color:#fff;padding:13px 28px;border-radius:var(--radius);font-size:15px;font-weight:600;text-decoration:none;transition:all 0.15s;border:none;cursor:pointer;font-family:inherit}
 .login-btn:hover{background:var(--orange-dk);transform:translateY(-1px);box-shadow:0 4px 16px rgba(255,106,0,0.3)}
 .login-note{font-size:12px;color:var(--muted);margin-top:16px}
+.login-legal{font-size:12px;color:var(--muted);margin-top:10px}
+.login-legal a{color:var(--orange);text-decoration:underline}
 
 .alert{padding:11px 14px;border-radius:var(--radius);font-size:13px;margin-bottom:16px;display:none}
 .alert.visible{display:flex;align-items:flex-start;gap:8px}
@@ -154,6 +156,11 @@ input:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,106,0,0.1)}
       Login with RingCentral
     </a>
     <div class="login-note">Your credentials are handled directly by RingCentral — never stored here.</div>
+    <div class="login-legal">
+      By logging in, you are agreeing to the terms of the
+      <a href="https://docs.google.com/document/d/1K9ocnw1Rmt_zLO2ghf3BPCE8zH03QXeSv7Tnyjv-Jn8/edit?tab=t.0"
+         target="_blank">RingCentral ACE Demo Agreement</a>.
+    </div>
   </div>
 
   {% else %}
