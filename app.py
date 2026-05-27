@@ -81,7 +81,7 @@ def oauth_callback():
     data  = resp.json()
     token = data["access_token"]
 
-    account_id   = "~"
+    account_id   = None
     display_name = ""
     try:
         me = requests.get(
@@ -89,15 +89,28 @@ def oauth_callback():
             headers={"Authorization": "Bearer " + token}, timeout=15).json()
         display_name = me.get("name", "") or me.get("contact", {}).get("firstName", "")
 
-        acct = requests.get(
-            "https://platform.ringcentral.com/restapi/v1.0/account/~/call-log",
-            headers={"Authorization": "Bearer " + token},
-            params={"perPage": 1}, timeout=15)
-        m = re.search(r"account/(\d+)", acct.json().get("uri", ""))
-        if m:
-            account_id = m.group(1)
+        # Try to get account ID directly from the account endpoint
+        acct_info = requests.get(
+            "https://platform.ringcentral.com/restapi/v1.0/account/~",
+            headers={"Authorization": "Bearer " + token}, timeout=15).json()
+        account_id = str(acct_info.get("id", "")).strip() or None
+
+        # Fallback: parse from call-log URI
+        if not account_id:
+            acct = requests.get(
+                "https://platform.ringcentral.com/restapi/v1.0/account/~/call-log",
+                headers={"Authorization": "Bearer " + token},
+                params={"perPage": 1}, timeout=15)
+            m = re.search(r"account/(\d+)", acct.json().get("uri", ""))
+            if m:
+                account_id = m.group(1)
     except Exception:
         pass
+
+    if not account_id:
+        return render_template("error.html",
+            message="Could not resolve your RingCentral account ID. "
+                    "Please ensure you are logged in as a Super Admin and try again."), 400
 
     session["rc_token"]         = token
     session["rc_account_id"]    = account_id
