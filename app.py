@@ -255,8 +255,8 @@ def run_download_job(job_id, token, account_id, customer_name, date_from, date_t
         total = len(records)
         job_log(job_id, f"Fetching RingSense transcripts for {total} calls…")
         job_log(job_id,
-                f"This takes about 1.5 seconds per call — estimated "
-                f"{round(total * 1.5 / 60, 1)} minutes. Please be patient…", "warn")
+                f"This takes about 6 seconds per call — estimated "
+                f"{round(total * 6 / 60, 1)} minutes. Please be patient…", "warn")
 
         transcript_records = []
         with_transcripts   = 0
@@ -354,7 +354,7 @@ def run_download_job(job_id, token, account_id, customer_name, date_from, date_t
                     token = new_token
                     job_log(job_id, "Access token refreshed — continuing download…", "ok")
 
-            time.sleep(3)  # 3s delay = ~20 requests/min, within RingSense rate limit
+            time.sleep(6)  # 6s delay = ~10 requests/min, within RingSense rate limit
 
         job_log(job_id, f"{with_transcripts} of {total} calls have transcripts", "ok")
         job["progress"] = 88
