@@ -272,23 +272,32 @@ def run_download_job(job_id, token, account_id, customer_name, date_from, date_t
             url = (f"https://platform.ringcentral.com/ai/ringsense/v1/public"
                    f"/accounts/{account_id}/domains/pbx/records/{recording_id}/insights")
 
-            while True:
+            # Exponential backoff: wait 60s, 120s, 240s then skip
+            backoff = 60
+            retries = 0
+            while retries <= 3:
                 try:
                     r = requests.get(url,
                                      headers={"Authorization": "Bearer " + token},
                                      timeout=30)
                     if r.status_code == 429:
-                        retry_after = int(r.headers.get("Retry-After", 65))
+                        wait = min(int(r.headers.get("Retry-After", backoff)), 300)
                         job_log(job_id,
-                                f"Rate limit hit on insights — waiting {retry_after} s…",
+                                f"Rate limit hit on insights (attempt {retries+1}/3) — waiting {wait} s…",
                                 "warn")
-                        time.sleep(retry_after)
+                        time.sleep(wait)
+                        backoff = min(backoff * 2, 300)
+                        retries += 1
                         continue
                     if r.status_code == 200:
                         insights = r.json()
                     break
                 except Exception:
                     break
+            if retries > 3:
+                job_log(job_id,
+                        f"Skipping call {i+1} after 3 rate limit retries — moving on.",
+                        "warn")
 
             if insights:
                 with_transcripts += 1
@@ -345,7 +354,7 @@ def run_download_job(job_id, token, account_id, customer_name, date_from, date_t
                     token = new_token
                     job_log(job_id, "Access token refreshed — continuing download…", "ok")
 
-            time.sleep(1.5)
+            time.sleep(3)  # 3s delay = ~20 requests/min, within RingSense rate limit
 
         job_log(job_id, f"{with_transcripts} of {total} calls have transcripts", "ok")
         job["progress"] = 88
