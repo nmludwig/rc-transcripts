@@ -112,6 +112,10 @@ def logout():
     session.clear()
     return redirect(url_for("index"))
 
+@app.route("/agreement")
+def agreement():
+    return render_template("agreement.html")
+
 @app.route("/api/start-job", methods=["POST"])
 def api_start_job():
     if not session.get("rc_token"):
