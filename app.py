@@ -230,7 +230,7 @@ def run_download_job(job_id, token, account_id, customer_name, date_from, date_t
                 "dateTo":        date_to   + "T23:59:59Z",
                 "type":          "Voice",
                 "withRecording": "true",
-                "perPage":       250,
+                "perPage":       1000,
                 "page":          page,
             }
             data = fetch_call_log_page(job_id, token, account_id, params)
@@ -239,7 +239,8 @@ def run_download_job(job_id, token, account_id, customer_name, date_from, date_t
             if not data.get("navigation", {}).get("nextPage"):
                 break
             page += 1
-            time.sleep(0.25)
+            job_log(job_id, f"Fetched call log page {page - 1} ({len(records)} calls so far) — waiting 6 s…")
+            time.sleep(6)  # stay within 10 requests/min rate limit
 
         job["progress"] = 15
         job_log(job_id, f"Found {len(records)} recorded calls", "ok")
